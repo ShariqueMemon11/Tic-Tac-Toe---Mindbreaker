@@ -14,8 +14,8 @@ const OnePlayer = () => {
   const [aiSymbol, setAiSymbol] = useState(""); // AI's symbol
   const [turn, setTurn] = useState(""); // Current turn
   const [winner, setWinner] = useState<string | null>(null);
-  const [xScore, setScoreX] = useState(0);
-  const [oScore, setScoreO] = useState(0);
+  const [playerScore, setScoreplayer] = useState(0);
+  const [aiScore, setScoreai] = useState(0);
   const [symbolSelected, setSymbolSelected] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
 
@@ -50,12 +50,11 @@ const OnePlayer = () => {
     setGrid((prevGrid) => {
       const newGrid = [...prevGrid.map((row) => [...row])];
       newGrid[row][col] = playerSymbol;
-
       const gameWinner = checkWinner(newGrid);
       if (gameWinner) {
         setWinner(gameWinner);
-        if (gameWinner === "X") setScoreX((prev) => prev + 1);
-        if (gameWinner === "O") setScoreO((prev) => prev + 1);
+        if (gameWinner === playerSymbol) setScoreplayer((prev) => prev + 1);
+        if (gameWinner === aiSymbol) setScoreai((prev) => prev + 1);
         setShowPopup(true); // Show the popup when there's a winner
       } else {
         setTurn(aiSymbol); // Switch turn to AI
@@ -78,14 +77,15 @@ const OnePlayer = () => {
   const setGame = (value: string) => {
     setPlayerSymbol(value);
     setAiSymbol(value === "X" ? "O" : "X"); // Set AI symbol to the opposite
-    setTurn(value); // Set the turn to the selected player
     setSymbolSelected(true);
+    setTurn("X")
+    
   };
 
   useEffect(() => {
     if (symbolSelected && turn === aiSymbol && !winner) {
       Botmove(grid);
- }
+    }
   }, [grid, turn, winner, symbolSelected]);
 
   const Botmove = (grid: string[][]) => {
@@ -117,8 +117,8 @@ const OnePlayer = () => {
         const gameWinner = checkWinner(newGrid);
         if (gameWinner) {
           setWinner(gameWinner);
-          if (gameWinner === "X") setScoreX((prev) => prev + 1);
-          if (gameWinner === "O") setScoreO((prev) => prev + 1);
+          if (gameWinner === playerSymbol) setScoreplayer((prev) => prev + 1);
+          if (gameWinner === aiSymbol) setScoreai((prev) => prev + 1);
           setShowPopup(true); // Show the popup when there's a winner
         } else {
           setTurn(playerSymbol); // Switch turn back to player
@@ -186,7 +186,6 @@ const OnePlayer = () => {
                 <TouchableOpacity
                   onPress={() => {
                     setGame("X");
-                    setSymbolSelected(true);
                   }}
                   style={styles.popupButton}
                 >
@@ -195,7 +194,6 @@ const OnePlayer = () => {
                 <TouchableOpacity
                   onPress={() => {
                     setGame("O");
-                    setSymbolSelected(true);
                   }}
                   style={styles.popupButton}
                 >
@@ -215,8 +213,9 @@ const OnePlayer = () => {
             />
             <Text style={styles.playerText}>Player</Text>
           </View>
-          <Text style={styles.score}>{xScore} : {oScore}</Text>
-          <View style={styles.playerBox}>
+          <Text style={styles.score}>{playerScore} : {aiScore}</Text>
+          <View 
+            style={styles.playerBox}>
             <Image
               source={require("../menu/images/robot.png")}
               style={styles.playerIcon}
@@ -224,7 +223,7 @@ const OnePlayer = () => {
             <Text style={styles.playerText}>AI</Text>
           </View>
         </View>
-        < View style={styles.gridContainer}>
+        <View style={styles.gridContainer}>
           {grid.map((row, rowIndex) =>
             row.map((cell, colIndex) => (
               <TouchableOpacity
@@ -252,13 +251,12 @@ const OnePlayer = () => {
                 </Text>
                 <Image source={require("../menu/images/trophy.png")} style={styles.trophyIcon} />
                 <View style={styles.popupButtons}>
-                <TouchableOpacity onPress={() => { resetGame(); setSymbolSelected(false); }} style={styles.popupButton}>
+                  <TouchableOpacity onPress={() => { resetGame(); setSymbolSelected(false); }} style={styles.popupButton}>
                     <Text style={styles.popupButtonText}>Play Again</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => navigation.goBack()} style={styles.popupButton}>
                     <Text style={styles.popupButtonText}>Back</Text>
                   </TouchableOpacity>
-                 
                 </View>
               </View>
             </View>
@@ -366,7 +364,7 @@ const styles = StyleSheet.create({
   popupButton: {
     backgroundColor: "#FFB800",
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 10 ,
     marginHorizontal: 10,
     flex: 1,
     alignItems: "center",
@@ -377,7 +375,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   img: {
-    padding : 20,
+    padding: 20,
     paddingTop: 20,
   },
 });
